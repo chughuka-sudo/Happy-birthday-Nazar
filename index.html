@@ -4,14 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>С Днём Рождения, Назар!</title>
+    <!-- Telegram Web App стили -->
     <meta name="telegram:channel" content="@your_channel">
     <meta name="theme-color" content="#0a0f1e">
-    
-    <!-- Звук поздравления -->
-    <audio id="celebrationSound" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
-    </audio>
-    
     <style>
         * {
             margin: 0;
@@ -28,9 +23,9 @@
             font-family: 'Montserrat', 'Poppins', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
             padding: 16px;
             overflow-x: hidden;
-            position: relative;
         }
 
+        /* Главная карточка */
         .card {
             max-width: 950px;
             width: 100%;
@@ -41,10 +36,9 @@
             padding: 24px 20px 40px 20px;
             transition: all 0.3s;
             border: 1px solid rgba(255, 200, 100, 0.3);
-            z-index: 10;
         }
 
-        /* Анимированный текст из воздуха */
+        /* ========= АНИМИРОВАННЫЙ ТЕКСТ ИЗ ВОЗДУХА ========= */
         .greeting {
             text-align: center;
             margin-bottom: 20px;
@@ -174,39 +168,11 @@
             font-family: inherit;
             touch-action: manipulation;
         }
-        
-        .btn-share {
-            background: linear-gradient(105deg, #3a2f48, #2b1f38);
-            border: none;
-            color: #ffeaac;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 10px 24px;
-            border-radius: 44px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            margin-top: 18px;
-            margin-left: 12px;
-            transition: 0.15s;
-            box-shadow: 0 5px 0 #0a0d18;
-            font-family: inherit;
-            touch-action: manipulation;
-        }
-        
-        .btn-replay:active, .btn-share:active {
+        .btn-replay:active {
             transform: translateY(2px);
             box-shadow: 0 2px 0 #0a0d18;
         }
-        
-        .footer { 
-            display: flex; 
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
+        .footer { display: flex; justify-content: center; }
         .hint {
             text-align: center;
             font-size: 0.75rem;
@@ -221,7 +187,7 @@
             .alpha-line { font-size: 1rem; }
             .birthday-message { font-size: 0.9rem; padding: 6px 16px; }
             .card { padding: 20px 16px; }
-            .btn-replay, .btn-share { padding: 8px 18px; font-size: 0.9rem; }
+            .btn-replay { padding: 8px 18px; font-size: 0.9rem; }
         }
 
         .confetti-area {
@@ -234,6 +200,7 @@
             z-index: 1000;
         }
 
+        /* Адаптация под Telegram WebView */
         @supports (padding: max(0px)) {
             body {
                 padding-top: env(safe-area-inset-top, 20px);
@@ -261,10 +228,8 @@
     <div class="cake-canvas-container">
         <canvas id="cakeCanvas" width="800" height="500" style="width:100%; height:auto; max-width:800px; aspect-ratio:800/500"></canvas>
     </div>
-    
     <div class="footer">
         <button class="btn-replay" id="replayAnimBtn">🎬 ЗАМЕСИТЬ ТОРТ ЗАНОВО 🎂</button>
-        <button class="btn-share" id="shareBtn">📤 ПОДЕЛИТЬСЯ В TG</button>
     </div>
     <div class="hint">
         🌬️ Нажми на торт — выпечка начнётся заново!
@@ -286,13 +251,9 @@
         let animDirection = 1;
         let animating = true;
         let animSpeed = 0.008;
-        let soundPlayed = false; // чтобы звук сыграл только раз
         
         let particles = [];
         const PARTICLE_COUNT = 65;
-        
-        // Звук
-        const sound = document.getElementById('celebrationSound');
         
         function initParticles() {
             particles = [];
@@ -340,6 +301,7 @@
             ctx.fillRect(0, 0, width, height);
             ctx.globalAlpha = 1;
             
+            // Стол
             ctx.fillStyle = '#5d3a1a';
             ctx.fillRect(0, height-70, width, 70);
             ctx.fillStyle = '#8b5a2b';
@@ -442,12 +404,6 @@
         }
         
         function launchCelebrationConfetti() {
-            // Воспроизводим звук (только один раз)
-            if(!soundPlayed && sound) {
-                sound.play().catch(e => console.log('Автовоспроизведение звука заблокировано'));
-                soundPlayed = true;
-            }
-            
             const container = document.getElementById('confettiContainer');
             while(container.firstChild) container.removeChild(container.firstChild);
             for(let i=0;i<200;i++) {
@@ -478,7 +434,6 @@
             animProgress = 0;
             animDirection = 1;
             animating = true;
-            soundPlayed = false;
             initParticles();
             const container = document.getElementById('confettiContainer');
             while(container.firstChild) container.removeChild(container.firstChild);
@@ -521,6 +476,7 @@
         
         canvas.addEventListener('click', (e) => {
             resetBakingAnimation();
+            let rect = canvas.getBoundingClientRect();
             let x = e.clientX;
             let y = e.clientY;
             let spark = document.createElement('div');
@@ -530,11 +486,6 @@
             spark.style.pointerEvents='none'; spark.style.zIndex='2000';
             document.body.appendChild(spark);
             setTimeout(()=>spark.remove(),500);
-            
-            // Вибрация для Telegram
-            if(window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.HapticFeedback.impactOccurred('light');
-            }
         });
         
         document.getElementById('replayAnimBtn').addEventListener('click', () => {
@@ -553,80 +504,17 @@
                 star.style.transition = 'top 1s ease';
                 setTimeout(()=> star.style.top = window.innerHeight-50+'px', 20);
             }
-            
-            if(window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-            }
-        });
-        
-        // Кнопка ПОДЕЛИТЬСЯ
-        document.getElementById('shareBtn').addEventListener('click', () => {
-            const message = '🎉 С Днём Рождения, Назар! 🎉\n🔥 Альфа сигмач, повелитель своей комнаты! 🔥\n🍰 Пусть твой торт всегда будет сладким! 🍰';
-            
-            if(window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.showAlert('🎂 Поздравление готово! Отправь другу ссылку или скопируй текст!');
-                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                // Копируем текст в буфер
-                navigator.clipboard.writeText(message + '\n\n' + window.location.href);
-            } else {
-                navigator.clipboard.writeText(message);
-                alert('📋 Поздравление скопировано в буфер! Отправь Назару 😊');
-            }
         });
         
         initParticles();
         animateBaking();
         
-        // Telegram WebApp инициализация
+        // Telegram WebApp инициализация (опционально)
         if(window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
             Telegram.WebApp.setHeaderColor('bg_color');
-            Telegram.WebApp.enableClosingConfirmation();
         }
-        
-        // Фоновые звёзды (красивая анимация)
-        const starCanvas = document.createElement('canvas');
-        starCanvas.style.position = 'fixed';
-        starCanvas.style.top = '0';
-        starCanvas.style.left = '0';
-        starCanvas.style.width = '100%';
-        starCanvas.style.height = '100%';
-        starCanvas.style.pointerEvents = 'none';
-        starCanvas.style.zIndex = '1';
-        document.body.appendChild(starCanvas);
-        
-        function resizeStars() {
-            starCanvas.width = window.innerWidth;
-            starCanvas.height = window.innerHeight;
-        }
-        resizeStars();
-        window.addEventListener('resize', resizeStars);
-        
-        const starCtx = starCanvas.getContext('2d');
-        let stars = [];
-        for(let i=0;i<120;i++) {
-            stars.push({
-                x: Math.random() * starCanvas.width,
-                y: Math.random() * starCanvas.height,
-                r: Math.random() * 2 + 1,
-                alpha: Math.random() * 0.7 + 0.2,
-                speed: 0.002 + Math.random() * 0.005
-            });
-        }
-        
-        function drawStars() {
-            starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
-            stars.forEach(s => {
-                starCtx.beginPath();
-                starCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                let twinkle = 0.5 + Math.sin(Date.now() * s.speed * 1000) * 0.5;
-                starCtx.fillStyle = `rgba(255, 215, 150, ${s.alpha * (0.3 + twinkle * 0.5)})`;
-                starCtx.fill();
-            });
-            requestAnimationFrame(drawStars);
-        }
-        drawStars();
     })();
 </script>
 </body>
